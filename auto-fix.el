@@ -141,6 +141,8 @@ a `before-save-hook'."
 (defvar-local auto-fix-command nil
   "Set auto-fix command.")
 
+(defvar-local auto-fix-otions '()
+  "Set fix option args. Default is empty")
 (defvar-local auto-fix-option "--fix"
   "Set fix option string.
 Default is `--fix`")
@@ -194,8 +196,12 @@ arguments can be set as a list via ‘auto-fix-option`."
 
           (write-region nil nil tmpfile)
 
-          (setq our-auto-fix-args
-                (append our-auto-fix-args (list auto-fix-option tmpfile)))
+          (let* ((args (append auto-fix-options `(,tmpfile)))
+                 (quoted-args (mapcar #'shell-quote-argument args)))
+
+            (setq our-auto-fix-args
+                  (append our-auto-fix-args quoted-args)))
+
           (message "Calling auto-fix: %s %s" auto-fix-command our-auto-fix-args)
           (if (zerop (apply #'process-file auto-fix-command nil errbuf nil our-auto-fix-args))
               (progn
